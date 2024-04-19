@@ -1,0 +1,46 @@
+type Order{
+  carrier: String
+  createdAt: Date
+  shippingCost: Int
+  trackingID: String
+  Address: String
+  City: String
+  Lat: Float
+  Lng: Float 
+  trackingItems: TrackingItems
+    # @materializer(
+    #   name:"getTrackingItemById"
+    #   arguments: [{name: "id", field: "trackingID"}]
+    # )
+     @materializer(
+      query: """
+      query GetTrackingItems($id: String!) {
+        getTrackingItemById(id: $id) {
+          customer_id
+          items {
+            item_id
+            name
+            price
+            quantity
+          }
+        }
+      }
+      """
+      arguments: [{name: "id", value: "trackingID"}]
+    )
+}
+
+type OrderList {
+  name: ID
+  value: Order
+}
+
+type Query {
+  """
+  Result typed as JSON since none of its fields is a valid GraphQL identifier ["-N6rOvLXK2t39x-Bp0UP", "-N6rQ_YDMNTjq_mCbhZN", "-N6rQsEqX4vt-0cBA336", "-N6rQvnBSkz2kglMvr5H", "-N6rSQz62DlXFPbd32CD"]
+  """
+  getOrders: [OrderList]
+    @rest(endpoint: "https://csp-ups-default-rtdb.firebaseio.com/orders.json"
+     transforms: [{pathpattern: [], editor:"objectToArray"}]
+     )
+}
